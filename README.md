@@ -1,4 +1,5 @@
-PHCS_Project
+PHCS_Alix_Board Server
 ============
 
-Participatory Healthcare System project Honours 2013
+This is an ALIX board Server.An Android tablet will connect and send data to this server, which will in turn send that 
+data to server.
