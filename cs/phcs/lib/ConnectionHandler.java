@@ -21,22 +21,54 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package phcs.alix.server;
+package phcs.lib;
+
+import java.io.IOException;
+import java.net.Socket;
 /**
- * Entry point for the server 
- * @author Zola
+ * Handling network socket request... 
+ * @author Zola Madolo
  *
  */
-public class ServerMain {
-	private static int DEFAULT_PORT = 5000;
-	public static void main(String[]args)
+public abstract class ConnectionHandler implements Runnable {
+ 
+	private Socket _socket;
+	public ConnectionHandler(Socket socket)
 	{
-		int port = DEFAULT_PORT;
-		if(args.length>0)
+		this._socket = socket;
+		displayConnectionInfo(_socket);
+	}
+	/**
+	 * Handle incoming request, respond to request...
+	 * @param socket
+	 * @throws IOException
+	 *
+	 */
+	protected abstract void handle(Socket socket) throws IOException;
+	protected abstract void displayConnectionInfo(Socket socket);
+	public void run()
+	{
+		try
 		{
-			port = Integer.parseInt(args[0]);
+			handle(_socket);
+		}catch(Exception ex)
+		{
+			System.out.println("Something went wrong while trying to handle... a socket");
 		}
-		Server server = new Server(port);
-		server.start();
+		finally
+		{
+			try {
+				// Should never be null, but let's be on the safe side anyway
+				if ( _socket != null ) {
+					// Some options, faster & safer?
+					_socket.setSoLinger(false, 0);
+					_socket.shutdownInput();
+					_socket.shutdownOutput();
+					_socket.close();
+				}
+			} catch (IOException e) {
+				// Ignore... OK.
+			}
+		}
 	}
 }
