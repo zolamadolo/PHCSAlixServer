@@ -66,15 +66,22 @@ public class ServerConnectionHandler extends ConnectionHandler {
 	protected void handle(Socket socket) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		String data_in = in.readLine();
+		System.out.println(data_in);
 		if(data_in!=null)
 		{
 			try {
 				JSONObject object = new JSONObject(data_in);
-				VitalParameter parameter = VitalParameter.getInstance();
-				parameter = parameter.convertToVitilParameter(object);
-				System.out.println(parameter.getName());
-				System.out.println(parameter.getValues().get("Low"));
-				System.out.println(parameter.getValues().get("High"));
+				//YOU MAY WANT TO SAVE THE DATA FIRST SO THAT IF IT WAS NOT 
+				//SUCCESSFUL YOU CAN ALWAYS SEND IT AGAIN... 
+				//send the data to a remote server
+				
+				VitalParameter parameter= VitalParameter.getInstance().convertToVitalParameter(object);
+				//Server.getServerClient().getClientHandler().setData(parameter);
+				
+				
+				System.out.println("Reading Name: "+parameter.getName());
+				System.out.println("LOW: "+parameter.getValues().get("Low"));
+				System.out.println("HIGH: "+parameter.getValues().get("High"));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

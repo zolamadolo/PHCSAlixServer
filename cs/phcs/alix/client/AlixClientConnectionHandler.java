@@ -21,76 +21,55 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package phcs.alix.server;
+package phcs.alix.client;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
+
+import org.json.JSONObject;
+
+import phcs.lib.ConnectionHandler;
+import phcs.lib.VitalParameter;
 /**
- * ServerThread, it start connectionHandler for the server... or incoming data
+ * Serves as a Client Connection handler between Client and Remote Server
  * @author Zola Madolo
- *
+ * 
  */
-public class ServerThread extends Thread implements Runnable{
-	private final int _port;
-	public ServerSocket _socketServer;
-	public int count = 0;
+public class AlixClientConnectionHandler extends ConnectionHandler {
+
+	private VitalParameter _data;
 	/**
-	 * Used when setting up ServerThread
-	 * @param port
+	 * Used when creating ClientConnectioHandler
+	 * @param socket
 	 */
-	public ServerThread(int port)
-	{
-		this._port = port;
-	}
-	public void run()
-	{
-		try
-		{
-			while(!isInterrupted())
-			{
-				Socket socket = _socketServer.accept();
-				ServerConnectionHandler handler = new ServerConnectionHandler(socket, count);
-				Thread thread = new Thread(handler);
-				thread.start();
-				count++;
-			}
-		}catch(IOException ex)
-		{
-			System.out.println("Unexpected problem during Socket listening");
-			System.out.println(ex.getMessage());
-		}
+	public AlixClientConnectionHandler(Socket socket) {
+		super(socket);
 	}
 	/**
-	 * Start Server ...
+	 * Set the data every time a new reading is received ... on the local server.
+	 * this data will be used later on when the handler method is called
+	 * @param data
 	 */
-	public void start()
+	public void setData(VitalParameter data)
 	{
-		try
+		this._data = data;
+	}
+	@Override
+	protected void handle(Socket socket) throws IOException {
+		if(this._data!=null)
 		{
-			_socketServer = new ServerSocket(_port);
-			super.start();
-		}catch(Exception ex)
-		{
-			System.out.println("Unexpected problem during Socket listening");
-			System.out.println(ex.getMessage());
+			JSONObject object = this._data.convertToJsonObject();
+			PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+			out.println(object.toString());
 		}
 	}
-	/**
-	 * Close Server...
-	 */
-	public void terminateServer()
-	{
-		try
-		{
-			if(_socketServer!=null)
-			{
-				_socketServer.close();
-				System.out.println("Android Connection Closed...");
-			}
-			this.interrupt();
-		}catch(Exception ex)
-		{
-			//ignore
-		}
+
+	@Override
+	protected void displayConnectionInfo(Socket socket) {
+		System.out.println("Client Connected Information");
+		System.out.println("Just connected on "+ socket.getPort()+" Host: "+socket.getInetAddress().getHostAddress());
 	}
 }

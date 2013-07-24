@@ -21,76 +21,72 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package phcs.alix.server;
+package phcs.alix.client;
+
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 /**
- * ServerThread, it start connectionHandler for the server... or incoming data
+ * Client, this connects to remote server...
  * @author Zola Madolo
  *
  */
-public class ServerThread extends Thread implements Runnable{
+public class AlixClient {
+
+	private final String _host;
 	private final int _port;
-	public ServerSocket _socketServer;
-	public int count = 0;
+	private Socket _socket;
+	private Thread thread_handler;
 	/**
-	 * Used when setting up ServerThread
+	 * Important as it serves as a listener for remote server feeds
+	 */
+	private AlixClientConnectionHandler clientHandler = null;
+	/**
+	 * Used when creating a Client object...
+	 * @param host
 	 * @param port
 	 */
-	public ServerThread(int port)
+	public AlixClient(String host,int port)
 	{
+		this._host = host;
 		this._port = port;
 	}
-	public void run()
+	/**
+	 * return instance of ConnectionHandler
+	 * @return ClientConnectionHandler
+	 */
+	public AlixClientConnectionHandler getClientHandler()
 	{
-		try
-		{
-			while(!isInterrupted())
-			{
-				Socket socket = _socketServer.accept();
-				ServerConnectionHandler handler = new ServerConnectionHandler(socket, count);
-				Thread thread = new Thread(handler);
-				thread.start();
-				count++;
-			}
-		}catch(IOException ex)
-		{
-			System.out.println("Unexpected problem during Socket listening");
-			System.out.println(ex.getMessage());
-		}
+		return clientHandler;
 	}
 	/**
-	 * Start Server ...
+	 * Connect to remote server and create ConnectionHandler object...
+	 * to handler remote server feeds... and local server feeds
+	 * @throws IOException
+	 * @throws Exception
 	 */
-	public void start()
+	public void connect() throws IOException,Exception
 	{
-		try
-		{
-			_socketServer = new ServerSocket(_port);
-			super.start();
-		}catch(Exception ex)
-		{
-			System.out.println("Unexpected problem during Socket listening");
-			System.out.println(ex.getMessage());
-		}
+		_socket = new Socket(_host,_port);
+		 clientHandler = new AlixClientConnectionHandler(_socket);
+		 thread_handler = new Thread(clientHandler);
+		 thread_handler.start();
 	}
 	/**
-	 * Close Server...
+	 * Disconnect Client from remote server.
 	 */
-	public void terminateServer()
+	public void disconnect()
 	{
 		try
 		{
-			if(_socketServer!=null)
+			if(_socket!=null)
 			{
-				_socketServer.close();
-				System.out.println("Android Connection Closed...");
+				_socket.close();
+				System.out.println("Client Connection Closed...");
 			}
-			this.interrupt();
+			thread_handler.interrupt();
 		}catch(Exception ex)
 		{
 			//ignore
-		}
+		}  
 	}
 }

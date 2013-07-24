@@ -23,14 +23,40 @@
  *******************************************************************************/
 package phcs.alix.server;
 
+import java.io.IOException;
+
+import phcs.alix.client.AlixClient;
+
+/**
+ * Server, it is the foundation of ServerThread...
+ * @author Zola Madolo
+ *
+ */
 public class Server {
 	private final int _port;
 	private boolean _started = false;
 	private ServerThread _serverThread;
+	
+	private final String REMOTE_HOST = "127.0.0.1";
+	private final int REMOTE_PORT = 6000;
+	
+	private static AlixClient serverClient = null;
+	
 	public Server(int port)
 	{
 		this._port = port;
 	}
+	/**
+	 * Get ServerClient to send data to remote server
+	 * @return Client
+	 */
+	public static AlixClient getServerClient()
+	{
+		return serverClient;
+	}
+	/**
+	 * Start Server... instantiate ServerThread
+	 */
 	public void start() {
 		if(!_started)
 		{
@@ -38,11 +64,30 @@ public class Server {
 			_serverThread.start();
 			_started = true;
 			System.out.println("Server Started on port: "+_port);
+			//Now start Client to connect to remote server
+			
+//			try {
+//				serverClient = new AlixClient(REMOTE_HOST,REMOTE_PORT);
+//				//serverClient.connect();
+//			} catch (IOException e) {
+//				System.out.print("Something went wrong while starting Client ");
+//				System.out.println("to connect to remote server");
+//				e.printStackTrace();
+//			} catch (Exception e) {
+//				System.out.print("Something went wrong while starting Client ");
+//				System.out.println("to connect to remote server");
+//				e.printStackTrace();
+//			}
+			
 		}else 
 		{
 			System.out.println("Server already started ");
 		}
 	}
+	
+	/**
+	 * Stop server...
+	 */
 	public void stop(){
 		if(_started)
 		{

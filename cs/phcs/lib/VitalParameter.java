@@ -124,7 +124,7 @@ public class VitalParameter {
 	 * @return VitalParameter
 	 * Check if the return value is not null...in case error is thrown...
 	 */
-	public VitalParameter convertToVitilParameter(JSONObject json)
+	public VitalParameter convertToVitalParameter(JSONObject json)
 	{
 		VitalParameter parameter = null;
 		try
