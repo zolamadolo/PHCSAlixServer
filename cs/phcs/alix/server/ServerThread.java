@@ -56,7 +56,7 @@ public class ServerThread extends Thread implements Runnable{
 			}
 		}catch(IOException ex)
 		{
-			System.out.println("Unexpected problem during Socket listening");
+			System.out.println("Unexpected error while listening to incoming connection");
 			System.out.println(ex.getMessage());
 		}
 	}
@@ -71,7 +71,7 @@ public class ServerThread extends Thread implements Runnable{
 			super.start();
 		}catch(Exception ex)
 		{
-			System.out.println("Unexpected problem during Socket listening");
+			System.out.println("Unexpected error while starting a server");
 			System.out.println(ex.getMessage());
 		}
 	}
